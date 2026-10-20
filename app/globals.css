@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Paleta de docs/diseno.html: fondo casi negro con acento verde lima. */
+@theme {
+  --color-fondo: #070807;
+  --color-pantalla: #0e100d;
+  --color-superficie: #171a15;
+  --color-superficie-2: #1f231c;
+  --color-borde: #2a2f26;
+  --color-texto: #f1f5ec;
+  --color-tenue: #8e9688;
+  --color-lima: #c6ff2e;
+  --color-lima-tinta: #0b0f02;
+  --color-descanso: #38bdf8;
+  --color-calentamiento: #fb923c;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --animate-aparecer: aparecer 0.35s ease both;
+  --animate-subir: subir 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @keyframes aparecer {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes subir {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to { opacity: 1; transform: none; }
   }
 }
 
+@theme inline {
+  --font-sans: var(--font-barlow);
+  --font-display: var(--font-barlow-condensed);
+}
+
+/* La app es siempre oscura: también los controles nativos (selects, barras de scroll). */
+html {
+  color-scheme: dark;
+  background: var(--color-fondo);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lima);
+  outline-offset: 2px;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

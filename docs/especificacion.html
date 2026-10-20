@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Especificación Mis Workouts</title>
+<style>
+  :root {
+    --bg: #faf8f4; --surface: #ffffff; --text: #1f1d1a; --muted: #6b665e;
+    --border: #e4dfd5; --accent: #c2410c; --accent-soft: #fff1e8;
+    --ok: #15803d; --ok-soft: #ecfdf3; --warn: #b45309; --warn-soft: #fff8e6;
+    --work: #c2410c; --rest: #0e7490; --code-bg: #f3efe7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171614; --surface: #201f1c; --text: #ece8e1; --muted: #a39d93;
+      --border: #36332e; --accent: #fb923c; --accent-soft: #2c1d12;
+      --ok: #4ade80; --ok-soft: #15241a; --warn: #fbbf24; --warn-soft: #2a2312;
+      --work: #ea580c; --rest: #0891b2; --code-bg: #2a2824;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171614; --surface: #201f1c; --text: #ece8e1; --muted: #a39d93;
+    --border: #36332e; --accent: #fb923c; --accent-soft: #2c1d12;
+    --ok: #4ade80; --ok-soft: #15241a; --warn: #fbbf24; --warn-soft: #2a2312;
+    --work: #ea580c; --rest: #0891b2; --code-bg: #2a2824;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 780px; margin: 0 auto; padding: 48px 16px 80px; }
+  .kicker { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin: 0 0 8px; }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0 0 12px; }
+  h2 { font-size: 24px; margin: 56px 0 12px; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { color: var(--accent); }
+  h3 { font-size: 18px; margin: 32px 0 6px; }
+  .lead { color: var(--muted); font-size: 18px; margin: 0; }
+  nav { margin: 28px 0 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  nav ol { margin: 0; padding-left: 20px; } nav a { color: var(--text); }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: 1px 6px; border-radius: 5px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  .analogy { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; }
+  .analogy strong:first-child { color: var(--accent); }
+  .term { font-size: 15px; color: var(--muted); }
+  .term b { color: var(--text); }
+  .table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.total td { font-weight: 700; }
+  .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px 20px 16px; margin: 20px 0; }
+  .feature h3 { display: flex; align-items: center; gap: 10px; }
+  .pill { font-size: 12px; font-weight: 700; background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 10px; }
+  .feature ul { padding-left: 20px; }
+  .timeline { display: flex; gap: 2px; margin: 10px 0 4px; height: 26px; }
+  .timeline span { border-radius: 3px; }
+  .timeline .w { background: var(--work); flex: 40; }
+  .timeline .r { background: var(--rest); flex: 20; }
+  .timeline .gap { flex: 6; background: transparent; }
+  .legend { font-size: 14px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+  .bars { margin: 12px 0; }
+  .bars .row { display: grid; grid-template-columns: 130px 1fr 52px; gap: 10px; align-items: center; margin: 6px 0; font-size: 15px; }
+  .bars .track { background: var(--code-bg); border-radius: 6px; height: 18px; overflow: hidden; }
+  .bars .fill { background: var(--work); height: 100%; border-radius: 6px; }
+  .bars .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 18px 0; }
+  .box { border-radius: 12px; padding: 14px 18px; border: 1px solid var(--border); background: var(--surface); }
+  .box h4 { margin: 0 0 4px; font-size: 16px; }
+  .box p { margin: 0; font-size: 15px; }
+  .box.warn { background: var(--warn-soft); }
+  footer { margin-top: 64px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 520px) { h1 { font-size: 28px; } body { font-size: 16px; } .bars .row { grid-template-columns: 96px 1fr 46px; } }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">mis-workouts · especificación</p>
+  <h1>Qué hace Mis Workouts</h1>
+  <p class="lead">Una app para armar <strong>un</strong> circuito de ejercicios por tiempo:
+    eliges ejercicios, decides cuántos segundos trabajar y descansar y cuántas vueltas dar,
+    y un temporizador te va guiando.</p>
+  <nav>
+    <ol>
+      <li><a href="#glosario">Glosario: las palabras que usamos</a></li>
+      <li><a href="#casos">Qué puede hacer la persona</a> (Explorar, Mi circuito, Entrenar)</li>
+      <li><a href="#guardado">Cómo se guarda el circuito</a></li>
+    </ol>
+  </nav>
+</header>
+
+<div class="analogy">
+  <strong>Imagina una clase de gimnasio en estaciones.</strong>
+  En el salón hay varias estaciones, cada una con un ejercicio. Suena un silbato y trabajas 40 segundos,
+  suena otra vez y descansas 20 mientras te mueves a la siguiente. Cuando pasas por todas, terminaste
+  una vuelta y empiezas otra. Mis Workouts es ese salón y ese silbato, en tu teléfono.
+</div>
+
+<!-- 1 -->
+<h2 id="glosario"><span class="n">1</span> Glosario</h2>
+<p>Estas palabras se usan igual en la pantalla y en el código, para que todos hablemos el mismo idioma.</p>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Término</th><th>Qué significa</th></tr>
+  <tr><td><strong>Ejercicio</strong></td><td>Una ficha del catálogo: nombre, parte del cuerpo, equipo, músculo protagonista, pasos y animación.</td></tr>
+  <tr><td><strong>Circuito</strong></td><td>Tu rutina: la lista ordenada de estaciones más los tiempos y las vueltas. La app guarda solo uno.</td></tr>
+  <tr><td><strong>Estación</strong></td><td>Un ejercicio puesto en un lugar del circuito. El mismo ejercicio puede estar en dos estaciones.</td></tr>
+  <tr><td><strong>Vuelta</strong></td><td>Pasar una vez por todas las estaciones, de la primera a la última. También le decimos <em>bloque</em>.</td></tr>
+  <tr><td><strong>Trabajo</strong></td><td>Los segundos que haces el ejercicio en cada estación. Son iguales para todas.</td></tr>
+  <tr><td><strong>Descanso</strong></td><td>Los segundos de pausa después de cada estación. Al final de todo no hay descanso.</td></tr>
+  <tr><td><strong>Fase</strong></td><td>Lo que está corriendo en el reloj ahora mismo: trabajo o descanso.</td></tr>
+  <tr><td><strong>Duración total</strong></td><td>Cuánto dura el circuito de principio a fin.</td></tr>
+  <tr><td><strong>Distribución muscular</strong></td><td>Cuántas veces y cuántos segundos trabaja cada músculo, por vuelta y en total.</td></tr>
+</table>
+</div>
+
+<!-- 2 -->
+<h2 id="casos"><span class="n">2</span> Qué puede hacer la persona</h2>
+<p>La app tiene tres partes. Van en el orden en que se usan: primero eliges, luego armas, luego entrenas.</p>
+
+<div class="feature">
+  <h3><span class="pill">1</span> Explorar</h3>
+  <div class="analogy" style="margin-top:0"><strong>Como el catálogo de una tienda.</strong> Hojeas, filtras por pasillo y miras la etiqueta de cada producto antes de echarlo al carrito.</div>
+  <ul>
+    <li><strong>Buscar</strong> escribiendo. Busca en el nombre (que viene en inglés), en un pequeño diccionario de palabras en español y en las etiquetas traducidas, así “sentadilla” también encuentra <em>squat</em>.</li>
+    <li><strong>Filtrar</strong> por parte del cuerpo (hay 10, como pecho, espalda o cintura) y por equipo (mancuerna, barra, solo tu cuerpo…). Los filtros se pueden combinar.</li>
+    <li><strong>Ver detalle</strong> de un ejercicio: músculos que trabaja, equipo, pasos numerados en español y la animación, siempre con el crédito “© Gym visual”.</li>
+    <li>Desde ahí, <strong>agregarlo</strong> a Mi circuito.</li>
+  </ul>
+</div>
+
+<div class="feature">
+  <h3><span class="pill">2</span> Mi circuito</h3>
+  <div class="analogy" style="margin-top:0"><strong>Como armar una lista de reproducción.</strong> Agregas canciones, quitas las que no, cambias el orden y ves cuánto dura en total.</div>
+  <ul>
+    <li><strong>Agregar</strong> un ejercicio: entra como nueva estación al final.</li>
+    <li><strong>Quitar</strong> una estación.</li>
+    <li><strong>Reordenar</strong>: subir, bajar o arrastrar estaciones.</li>
+    <li><strong>Configurar</strong> trabajo, descanso y vueltas. Al empezar: 40 s, 20 s y 3 vueltas.</li>
+    <li><strong>Ver la duración total</strong>, que se actualiza sola con cada cambio.</li>
+    <li><strong>Ver la distribución muscular</strong>: qué músculos trabajas, cuántas veces por vuelta y cuántos segundos.</li>
+  </ul>
+
+  <h3>Ejemplo: 5 estaciones, 40 s de trabajo, 20 s de descanso, 3 vueltas</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>Ejercicio</th><th>Músculo protagonista</th></tr>
+    <tr><td>1</td><td>Sentadilla con barra <span class="term">(0043)</span></td><td>Glúteos</td></tr>
+    <tr><td>2</td><td>Press de banca con barra <span class="term">(0025)</span></td><td>Pectorales</td></tr>
+    <tr><td>3</td><td>Dominadas <span class="term">(0652)</span></td><td>Dorsales</td></tr>
+    <tr><td>4</td><td>Abdominal 3/4 <span class="term">(0001)</span></td><td>Abdominales</td></tr>
+    <tr><td>5</td><td>Flexión lateral 45° <span class="term">(0002)</span></td><td>Abdominales</td></tr>
+  </table>
+  </div>
+
+  <p><strong>Así se ve una vuelta</strong> en el tiempo:</p>
+  <div class="timeline" role="img" aria-label="Una vuelta: 5 bloques de trabajo de 40 segundos, cada uno seguido de 20 segundos de descanso">
+    <span class="w"></span><span class="r"></span><span class="w"></span><span class="r"></span><span class="w"></span><span class="r"></span><span class="w"></span><span class="r"></span><span class="w"></span><span class="r"></span>
+  </div>
+  <div class="legend"><span><i class="sw" style="background:var(--work)"></i>Trabajo 40 s</span><span><i class="sw" style="background:var(--rest)"></i>Descanso 20 s</span><span>× 3 vueltas</span></div>
+
+  <h3>Distribución muscular</h3>
+  <p>Es como el recibo del súper agrupado por pasillo: cuánto “compró” cada músculo. No se escribe a mano; la app la calcula a partir de las estaciones.</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Músculo</th><th class="num">Veces por vuelta</th><th class="num">Trabajo por vuelta</th><th class="num">Veces en total</th><th class="num">Trabajo total</th></tr>
+    <tr><td>Abdominales</td><td class="num">2</td><td class="num">80 s</td><td class="num">6</td><td class="num">4:00</td></tr>
+    <tr><td>Glúteos</td><td class="num">1</td><td class="num">40 s</td><td class="num">3</td><td class="num">2:00</td></tr>
+    <tr><td>Pectorales</td><td class="num">1</td><td class="num">40 s</td><td class="num">3</td><td class="num">2:00</td></tr>
+    <tr><td>Dorsales</td><td class="num">1</td><td class="num">40 s</td><td class="num">3</td><td class="num">2:00</td></tr>
+    <tr class="total"><td>Total</td><td class="num">5</td><td class="num">200 s</td><td class="num">15</td><td class="num">10:00</td></tr>
+  </table>
+  </div>
+  <div class="bars" role="img" aria-label="Trabajo total por músculo: abdominales 4 minutos, glúteos, pectorales y dorsales 2 minutos cada uno">
+    <div class="row"><span>Abdominales</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="v">4:00</span></div>
+    <div class="row"><span>Glúteos</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="v">2:00</span></div>
+    <div class="row"><span>Pectorales</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="v">2:00</span></div>
+    <div class="row"><span>Dorsales</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="v">2:00</span></div>
+  </div>
+  <p class="term">Se cuenta solo el músculo protagonista de cada ejercicio. Los músculos que ayudan no suman, para no contar dos veces el mismo esfuerzo.</p>
+
+  <h3>Duración total</h3>
+  <p>Se suman todos los ratos de trabajo y todos los descansos. Al final no hay descanso, porque ya terminaste:</p>
+  <ul>
+    <li>Trabajo: 5 estaciones × 3 vueltas = 15 veces × 40 s = <strong>600 s</strong></li>
+    <li>Descanso: 15 − 1 = 14 veces × 20 s = <strong>280 s</strong></li>
+    <li>Total: 880 s = <strong>14 minutos 40 segundos</strong></li>
+  </ul>
+</div>
+
+<div class="feature">
+  <h3><span class="pill">3</span> Entrenar</h3>
+  <div class="analogy" style="margin-top:0"><strong>Como un entrenador con silbato.</strong> Te dice cuándo empezar, cuándo parar, en qué vuelta vas y qué viene después.</div>
+  <ul>
+    <li><strong>Reproducir</strong>: el reloj avanza solo: trabajo, descanso, siguiente estación, y así vuelta tras vuelta.</li>
+    <li><strong>Pausar</strong> y seguir justo donde ibas.</li>
+    <li><strong>Saltar</strong> a la siguiente fase, por ejemplo cortar un descanso.</li>
+    <li><strong>Ver</strong> en grande: “Vuelta 2 de 3”, “Estación 4 de 5”, si es trabajo o descanso, los segundos que faltan y el próximo ejercicio.</li>
+    <li><strong>Ver el circuito</strong> mientras entrenas, como el mapa de una carrera: qué vueltas y estaciones ya hiciste, dónde estás y cuánto tiempo falta.</li>
+    <li>Si el circuito está vacío, no se puede entrenar.</li>
+  </ul>
+</div>
+
+<!-- 3 -->
+<h2 id="guardado"><span class="n">3</span> Cómo se guarda el circuito</h2>
+
+<div class="analogy">
+  <strong>Como una nota pegada en el refri.</strong>
+  No copias las recetas completas: anotas “platillos 43, 25, 652, 1 y 2; 40 segundos, 20 de descanso, 3 vueltas”.
+  Las recetas ya están en el libro (el catálogo); la nota solo dice cuáles y en qué orden.
+</div>
+
+<p>El circuito se guarda en el propio navegador, en un cajón que se llama <code>mis-workouts:circuito</code>.</p>
+<p class="term"><b>localStorage:</b> un pequeño cajón que cada navegador le presta a una página para guardar notas; sigue ahí aunque cierres la pestaña, pero solo en ese navegador y en ese aparato.</p>
+
+<pre><code>{
+  "version": 1,
+  "ejercicios": ["0043", "0025", "0652", "0001", "0002"],
+  "trabajo": 40,
+  "descanso": 20,
+  "vueltas": 3
+}</code></pre>
+
+<ul>
+  <li>El orden de la lista <code>ejercicios</code> es el orden de las estaciones.</li>
+  <li>Si un número se repite, son dos estaciones con el mismo ejercicio.</li>
+  <li>La duración total y la distribución muscular <strong>no</strong> se guardan: se recalculan cada vez, como el total de una cuenta.</li>
+  <li><code>version</code> es como la edición de un formulario: si un día cambia, la app sabe cómo leer las notas viejas.</li>
+</ul>
+
+<h3>¿Y si el cajón está vacío o la nota está rota?</h3>
+<div class="two">
+  <div class="box"><h4>Primera visita</h4><p>No hay nota. El circuito empieza vacío con 40 s / 20 s / 3 vueltas, y la app muestra “Tu circuito está vacío” con un botón para ir a Explorar.</p></div>
+  <div class="box"><h4>Nota ilegible</h4><p>Si alguien la manchó (datos rotos), la app la trata como vacía y la reescribe con el siguiente cambio.</p></div>
+  <div class="box"><h4>Un ejercicio ya no existe</h4><p>Se salta esa estación y se avisa: “1 ejercicio ya no está disponible”.</p></div>
+  <div class="box warn"><h4>Navegador sin cajón</h4><p>En modo privado puede no haber cajón. La app funciona igual, pero el circuito se pierde al cerrar.</p></div>
+</div>
+
+<h3>Si un día hay usuarios</h3>
+<div class="analogy">
+  <strong>La nota del refri pasa a un archivero con fichas.</strong>
+  Una ficha por circuito, con el nombre del dueño y sus tiempos, y otra hoja con las estaciones numeradas.
+</div>
+<p class="term"><b>Tabla:</b> una hoja de cálculo dentro de una base de datos; cada fila es un registro y cada columna, un dato.</p>
+
+<p><strong>circuitos</strong>: una fila por circuito</p>
+<div class="table-wrap">
+<table>
+  <tr><th>id</th><th>usuario_id</th><th class="num">trabajo</th><th class="num">descanso</th><th class="num">vueltas</th><th>actualizado_en</th></tr>
+  <tr><td>1</td><td>42</td><td class="num">40</td><td class="num">20</td><td class="num">3</td><td>2026-10-17 10:00</td></tr>
+</table>
+</div>
+
+<p><strong>circuito_estaciones</strong>: una fila por estación</p>
+<div class="table-wrap">
+<table>
+  <tr><th>circuito_id</th><th class="num">posicion</th><th>ejercicio_id</th></tr>
+  <tr><td>1</td><td class="num">1</td><td>0043</td></tr>
+  <tr><td>1</td><td class="num">2</td><td>0025</td></tr>
+  <tr><td>1</td><td class="num">3</td><td>0652</td></tr>
+  <tr><td>1</td><td class="num">4</td><td>0001</td></tr>
+  <tr><td>1</td><td class="num">5</td><td>0002</td></tr>
+</table>
+</div>
+
+<ul>
+  <li>Lo único nuevo es <code>usuario_id</code>, que dice de quién es el circuito.</li>
+  <li><code>posicion</code> hace lo mismo que el orden de la lista en la nota.</li>
+  <li>Si después cada persona quiere varios circuitos, no hay que rediseñar nada: solo habrá más filas.</li>
+  <li>Cuando alguien inicie sesión por primera vez, su nota del navegador se pasa a estas tablas.</li>
+</ul>
+
+<footer>
+  Mismo contenido que <code>CONTEXT.md</code>. Datos de ejercicios: <a href="fuente.html">ver docs/fuente.html</a>.
+</footer>
+
+</main>
+</body>
+</html>

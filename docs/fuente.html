@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fuente de datos</title>
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --text: #1f1d1a;
+    --muted: #6b665e;
+    --border: #e4dfd5;
+    --accent: #c2410c;
+    --accent-soft: #fff1e8;
+    --ok: #15803d;
+    --ok-soft: #ecfdf3;
+    --warn: #b45309;
+    --warn-soft: #fff8e6;
+    --code-bg: #f3efe7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171614;
+      --surface: #201f1c;
+      --text: #ece8e1;
+      --muted: #a39d93;
+      --border: #36332e;
+      --accent: #fb923c;
+      --accent-soft: #2c1d12;
+      --ok: #4ade80;
+      --ok-soft: #15241a;
+      --warn: #fbbf24;
+      --warn-soft: #2a2312;
+      --code-bg: #2a2824;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171614; --surface: #201f1c; --text: #ece8e1; --muted: #a39d93;
+    --border: #36332e; --accent: #fb923c; --accent-soft: #2c1d12; --ok: #4ade80;
+    --ok-soft: #15241a; --warn: #fbbf24; --warn-soft: #2a2312; --code-bg: #2a2824;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 80px; }
+  header p.kicker { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 13px; margin: 0 0 8px; }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0 0 12px; }
+  h2 { font-size: 23px; margin: 56px 0 12px; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { color: var(--accent); font-variant-numeric: tabular-nums; }
+  h3 { font-size: 17px; margin: 28px 0 6px; }
+  .lead { color: var(--muted); font-size: 18px; margin: 0; }
+  nav { margin: 28px 0 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  nav ol { margin: 0; padding-left: 20px; }
+  nav a { color: var(--text); }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: 1px 6px; border-radius: 5px; }
+  .analogy { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; }
+  .analogy strong:first-child { color: var(--accent); }
+  .term { font-size: 15px; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
+  .term b { color: var(--text); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 18px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .card .big { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .card .lbl { color: var(--muted); font-size: 14px; }
+  .table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td code { white-space: nowrap; }
+  .ex { color: var(--muted); }
+  .bar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; margin: 12px 0 6px; border: 1px solid var(--border); }
+  .bar span { display: flex; align-items: center; padding: 0 8px; font-size: 13px; white-space: nowrap; overflow: hidden; }
+  .bar .a { background: var(--accent); color: #fff; }
+  .bar .b { background: var(--warn); color: #fff; }
+  .bar .c { background: var(--muted); color: #fff; }
+  .legend { font-size: 14px; color: var(--muted); }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 18px 0; }
+  .box { border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border); }
+  .box.ok { background: var(--ok-soft); }
+  .box.warn { background: var(--warn-soft); }
+  .box h3 { margin-top: 0; }
+  .box.ok h3 { color: var(--ok); }
+  .box.warn h3 { color: var(--warn); }
+  .box ul { margin: 0; padding-left: 20px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 13.5px; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  footer { margin-top: 64px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 520px) { h1 { font-size: 28px; } body { font-size: 16px; } }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">mis-workouts · documentación</p>
+  <h1>De dónde salen nuestros ejercicios</h1>
+  <p class="lead">Una guía en lenguaje simple sobre el repositorio
+    <a href="https://github.com/hasaneyldrm/exercises-dataset">hasaneyldrm/exercises-dataset</a>,
+    la base de la app.</p>
+  <nav>
+    <ol>
+      <li><a href="#que">Qué contiene el repositorio</a></li>
+      <li><a href="#campos">Qué significa cada campo de un ejercicio</a></li>
+      <li><a href="#peso">Cuánto pesa el archivo y por qué</a></li>
+      <li><a href="#idiomas">Qué está en español y qué solo en inglés</a></li>
+      <li><a href="#licencia">Qué permite la licencia: datos vs. imágenes</a></li>
+    </ol>
+  </nav>
+</header>
+
+<!-- 1 -->
+<h2 id="que"><span class="n">1</span> Qué contiene el repositorio</h2>
+
+<div class="analogy">
+  <strong>Piénsalo como un gimnasio con su catálogo.</strong>
+  Hay un <em>libro grande</em> que describe cada ejercicio (el archivo de datos), una
+  <em>caja de fotos</em> y una <em>caja de animaciones</em> que muestran cómo se hace cada uno,
+  y un <em>contrato</em> que dice qué puedes hacer con todo eso.
+  <div class="term"><b>Repositorio:</b> una carpeta de proyecto guardada en internet (aquí, en GitHub), con todo su historial.</div>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="big">1,324</div><div class="lbl">ejercicios</div></div>
+  <div class="card"><div class="big">10</div><div class="lbl">idiomas en las instrucciones</div></div>
+  <div class="card"><div class="big">1,324 × 2</div><div class="lbl">imágenes: una foto fija y una animación por ejercicio</div></div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Pieza</th><th>Qué es, en simple</th></tr>
+  <tr><td><code>data/exercises.json</code></td><td>El libro grande: una lista con los 1,324 ejercicios y todo lo que se sabe de cada uno.</td></tr>
+  <tr><td><code>data/exercises.schema.json</code></td><td>El “formulario en blanco”: dice qué casillas debe tener cada ejercicio y qué tipo de dato va en cada una.</td></tr>
+  <tr><td><code>images/</code></td><td>1,324 fotos pequeñas (180×180 píxeles, como una estampita).</td></tr>
+  <tr><td><code>videos/</code></td><td>1,324 animaciones GIF del mismo tamaño que muestran el movimiento.</td></tr>
+  <tr><td><code>index.html</code>, <code>setup.html</code></td><td>Un buscador de ejercicios y una guía para programadores, ya hechos.</td></tr>
+  <tr><td><code>LICENSE</code>, <code>NOTICE.md</code></td><td>El contrato: qué puedes usar y con qué condiciones.</td></tr>
+</table>
+</div>
+
+<p class="term"><b>JSON:</b> un formato de texto para guardar datos ordenados en “casillas con nombre”, fácil de leer para personas y programas.<br>
+<b>GIF:</b> un tipo de imagen que se mueve en bucle, como un mini video sin sonido.</p>
+
+<p>Los ejercicios se reparten por zona del cuerpo. Los que más hay son de brazos
+(292), piernas (227) y espalda (203); de cuello solo hay 2. Un 25 % (325) se hacen
+sin equipo, con el peso del cuerpo.</p>
+
+<!-- 2 -->
+<h2 id="campos"><span class="n">2</span> Qué significa cada campo de un ejercicio</h2>
+
+<div class="analogy">
+  <strong>Cada ejercicio es una ficha de biblioteca.</strong>
+  Todas las fichas tienen las mismas casillas (nombre, zona del cuerpo, equipo…), solo cambia lo que está escrito en ellas.
+  <div class="term"><b>Campo:</b> cada una de esas casillas con nombre dentro de la ficha.</div>
+</div>
+
+<p>Este es el <strong>ejercicio real número 1</strong>, tal como aparece al inicio del archivo (recortado):</p>
+
+<pre><code>{
+  "id": "0001",
+  "name": "3/4 sit-up",
+  "category": "waist",
+  "body_part": "waist",
+  "equipment": "body weight",
+  "instructions": {
+    "en": "Lie flat on your back with your knees bent…",
+    "es": "Túmbate sobre tu espalda con las rodillas flexionadas…",
+    … (8 idiomas más)
+  },
+  "instruction_steps": {
+    "es": [
+      "Túmbate sobre tu espalda con las rodillas flexionadas y los pies apoyados en el suelo.",
+      "Coloca las manos detrás de la cabeza con los codos apuntando hacia afuera.",
+      … (3 pasos más)
+    ],
+    … (9 idiomas más)
+  },
+  "muscle_group": "hip flexors",
+  "secondary_muscles": ["hip flexors", "lower back"],
+  "target": "abs",
+  "image": "images/0001-2gPfomN.jpg",
+  "gif_url": "videos/0001-2gPfomN.gif",
+  "media_id": "2gPfomN",
+  "created_at": "2026-03-18T12:31:32.854798+00:00",
+  "attribution": "© Gym visual — https://gymvisual.com/"
+}</code></pre>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Campo</th><th>Qué significa</th><th>En el ejemplo</th></tr>
+  <tr><td><code>id</code></td><td>Número de ficha. Siempre 4 dígitos, único para cada ejercicio, como el número de un casillero.</td><td class="ex">"0001"</td></tr>
+  <tr><td><code>name</code></td><td>Nombre del ejercicio.</td><td class="ex">"3/4 sit-up" (abdominal a tres cuartos)</td></tr>
+  <tr><td><code>body_part</code></td><td>Zona del cuerpo que se trabaja. Solo puede ser una de 10 opciones (espalda, cardio, pecho, antebrazos, pantorrillas, cuello, hombros, brazos, piernas, cintura).</td><td class="ex">"waist" (cintura)</td></tr>
+  <tr><td><code>category</code></td><td>Lo mismo que <code>body_part</code>, repetido. Es una copia, no información nueva.</td><td class="ex">"waist"</td></tr>
+  <tr><td><code>equipment</code></td><td>Qué necesitas para hacerlo.</td><td class="ex">"body weight" (solo tu cuerpo)</td></tr>
+  <tr><td><code>target</code></td><td>El músculo protagonista: el que más trabaja.</td><td class="ex">"abs" (abdominales)</td></tr>
+  <tr><td><code>muscle_group</code></td><td>El músculo ayudante principal.</td><td class="ex">"hip flexors" (flexores de cadera)</td></tr>
+  <tr><td><code>secondary_muscles</code></td><td>Lista de músculos de reparto, que también participan.</td><td class="ex">flexores de cadera, zona lumbar</td></tr>
+  <tr><td><code>instructions</code></td><td>Cómo hacer el ejercicio, en un solo párrafo, en cada uno de los 10 idiomas.</td><td class="ex">"Túmbate sobre tu espalda…"</td></tr>
+  <tr><td><code>instruction_steps</code></td><td>El mismo texto, pero partido en pasos numerados, como una receta. Ideal para mostrar “Paso 1, Paso 2…”.</td><td class="ex">5 pasos</td></tr>
+  <tr><td><code>image</code></td><td>Dónde está la foto fija dentro del repositorio. Es la dirección de la foto, no la foto en sí.</td><td class="ex">images/0001-2gPfomN.jpg</td></tr>
+  <tr><td><code>gif_url</code></td><td>Dónde está la animación.</td><td class="ex">videos/0001-2gPfomN.gif</td></tr>
+  <tr><td><code>media_id</code></td><td>El código con el que el dueño original de las imágenes identifica esta animación.</td><td class="ex">"2gPfomN"</td></tr>
+  <tr><td><code>attribution</code></td><td>El crédito de autor que hay que mostrar junto a las imágenes.</td><td class="ex">© Gym visual</td></tr>
+  <tr><td><code>created_at</code></td><td>Fecha y hora en que se creó la ficha.</td><td class="ex">18 de marzo de 2026</td></tr>
+</table>
+</div>
+
+<p>El segundo ejercicio del archivo, para comparar: <strong>“45° side bend”</strong>
+(flexión lateral de tronco), id <code>0002</code>, zona <em>waist</em>, equipo <em>body weight</em>,
+músculo protagonista <em>abs</em>, ayudante <em>obliques</em> (oblicuos). Su primer paso en español:
+“Ponte de pie con los pies separados a la altura de los hombros y los brazos extendidos hacia abajo a los lados.”</p>
+
+<!-- 3 -->
+<h2 id="peso"><span class="n">3</span> Cuánto pesa el archivo y por qué</h2>
+
+<div class="cards">
+  <div class="card"><div class="big">17.4 MB</div><div class="lbl">tamaño de <code>exercises.json</code></div></div>
+  <div class="card"><div class="big">~13 KB</div><div class="lbl">por ejercicio, en promedio</div></div>
+  <div class="card"><div class="big">0 fotos</div><div class="lbl">dentro del archivo: solo trae sus direcciones</div></div>
+</div>
+
+<p class="term"><b>MB / KB:</b> unidades de tamaño. 1 MB son unas mil KB. Una página de texto plano pesa unas 3 KB.</p>
+
+<p>17.4 MB de <em>solo texto</em> es muchísimo: equivale a unas 5,000 páginas.
+Medí el ejercicio número 1 por dentro y esto es lo que ocupa:</p>
+
+<div class="bar" role="img" aria-label="Del ejercicio 1: 47% instrucciones en párrafo, 47% las mismas instrucciones en pasos, 6% el resto de los datos">
+  <span class="a" style="width:47%">párrafos, 10 idiomas</span>
+  <span class="b" style="width:47%">mismos textos en pasos</span>
+  <span class="c" style="width:6%"></span>
+</div>
+<p class="legend">Ejercicio 0001: unas 11 KB en total. Las instrucciones ocupan el 94 %. Nombre, músculos, equipo y demás casillas apenas ocupan unos 400 bytes (el gris).</p>
+
+<p>Hay tres razones:</p>
+<ol>
+  <li><strong>Todo viene en 10 idiomas.</strong> Es como un manual de electrodoméstico que trae el mismo texto impreso en diez idiomas.</li>
+  <li><strong>Y luego todo viene dos veces.</strong> Cada texto está como párrafo (<code>instructions</code>) y otra vez partido en pasos (<code>instruction_steps</code>). Es el mismo manual impreso dos veces.</li>
+  <li><strong>Algunos alfabetos ocupan más espacio.</strong> Una letra latina ocupa 1 byte; una letra rusa ocupa 2 y una hindi o china, 3. Las instrucciones en hindi del ejercicio 1 pesan más del doble que las mismas en inglés.
+    <div class="term"><b>Byte:</b> la unidad mínima de espacio en una computadora; más o menos, lo que ocupa una letra sencilla.</div></li>
+</ol>
+
+<div class="analogy">
+  <strong>Para la app, esto importa:</strong> si cargamos el archivo completo en el teléfono de alguien, es como mandarle por correo los diez manuales para que lea uno.
+  El español es solo el 8–9 % del total. Si nos quedamos con español (y quizá inglés de respaldo) y una sola versión del texto, el archivo baja a una fracción de su tamaño.
+</div>
+
+<!-- 4 -->
+<h2 id="idiomas"><span class="n">4</span> Qué está en español y qué solo en inglés</h2>
+
+<div class="two">
+  <div class="box ok">
+    <h3>En español ✓</h3>
+    <ul>
+      <li><code>instructions.es</code>: el párrafo con cómo hacerlo</li>
+      <li><code>instruction_steps.es</code>: los pasos numerados</li>
+    </ul>
+  </div>
+  <div class="box warn">
+    <h3>Solo en inglés</h3>
+    <ul>
+      <li><code>name</code>: nombre del ejercicio</li>
+      <li><code>body_part</code> / <code>category</code>: zona del cuerpo</li>
+      <li><code>equipment</code>: equipo</li>
+      <li><code>target</code>, <code>muscle_group</code>, <code>secondary_muscles</code>: músculos</li>
+    </ul>
+  </div>
+</div>
+
+<div class="analogy">
+  <strong>Es como un menú con la receta traducida, pero los platillos con su nombre original.</strong>
+  Sabes cómo se prepara “3/4 sit-up”, pero el título del platillo sigue en inglés.
+</div>
+
+<p>Qué significa para la app:</p>
+<ul>
+  <li><strong>Zonas del cuerpo, equipo y músculos son fáciles de traducir.</strong> Son listas cortas que se repiten (por ejemplo, solo hay 10 zonas del cuerpo). Basta un pequeño diccionario: <code>"waist"</code> → “cintura”.</li>
+  <li><strong>Los 1,324 nombres son el reto.</strong> Cada uno es distinto. Habrá que mostrarlos en inglés, traducirlos poco a poco o generar una traducción y revisarla.</li>
+  <li>La búsqueda también se ve afectada: si alguien escribe “sentadilla”, no la encontrará en el nombre (<em>squat</em>), aunque sí en las instrucciones en español.</li>
+</ul>
+
+<!-- 5 -->
+<h2 id="licencia"><span class="n">5</span> Qué permite la licencia: datos vs. imágenes</h2>
+
+<div class="analogy">
+  <strong>Es como comprar un libro de recetas con fotos de otro fotógrafo.</strong>
+  El autor del libro te regala las recetas: cópialas, cámbialas, véndelas. Pero las fotos son de otra persona,
+  que solo le dio permiso <em>a él</em> de ponerlas en su libro. Tener el libro no te da permiso de usar las fotos en el tuyo.
+  <div class="term"><b>Licencia:</b> el permiso por escrito que dice qué puedes hacer con algo que hizo otra persona.</div>
+</div>
+
+<div class="two">
+  <div class="box ok">
+    <h3>Datos y textos: licencia MIT</h3>
+    <p style="margin-top:0">Cubre nombres, zonas, equipo, músculos, las instrucciones y sus traducciones, y el código.</p>
+    <ul>
+      <li>Puedes usarlos, copiarlos, modificarlos y publicarlos.</li>
+      <li>Puedes usarlos en una app comercial, incluso de pago.</li>
+      <li><strong>Única condición:</strong> incluir el aviso de copyright (© 2026 Hasan Emir Yıldırım) y el texto de la licencia.</li>
+      <li>Viene “tal cual”: si hay un error en los datos, el autor no se hace responsable.</li>
+    </ul>
+    <p class="term"><b>MIT:</b> una de las licencias más permisivas que existen. Básicamente: “haz lo que quieras, pero dame crédito”.</p>
+  </div>
+  <div class="box warn">
+    <h3>Imágenes y GIFs: © Gym visual</h3>
+    <p style="margin-top:0">Las carpetas <code>images/</code> y <code>videos/</code> <strong>no</strong> son MIT.</p>
+    <ul>
+      <li>Son propiedad de Gym visual. El autor del repositorio tiene un permiso escrito <em>para él</em>.</li>
+      <li>Solo se distribuyen en 180×180 píxeles, y siempre con el crédito “© Gym visual — https://gymvisual.com/”.</li>
+      <li>Clonar el repositorio <strong>no te da licencia</strong>. Para reutilizarlas rigen los
+        <a href="https://gymvisual.com/content/3-terms-and-conditions-of-use">términos de Gym visual</a>,
+        y puede que necesites tu propia licencia con ellos.</li>
+    </ul>
+  </div>
+</div>
+
+<p class="term"><b>Copyright (©):</b> el derecho del autor a decidir quién copia y usa su obra.<br>
+<b>Clonar:</b> descargar una copia completa de un repositorio.</p>
+
+<p><strong>Para mis-workouts:</strong> podemos usar los datos y las instrucciones con total
+libertad, siempre que incluyamos el aviso MIT. Mostrar las animaciones en una app pública
+es otra historia: antes habría que leer los términos de Gym visual y, si hace falta,
+pedirles licencia. Para una app de práctica personal, lo prudente es mostrar siempre el
+crédito © Gym visual y no agrandar las imágenes. Esto es un resumen para orientarnos, no
+asesoría legal.</p>
+
+<footer>
+  Fuentes leídas el 17 de octubre de 2026 de <code>raw.githubusercontent.com</code>: README.md,
+  data/exercises.schema.json, NOTICE.md, LICENSE y los primeros 30 KB de data/exercises.json.
+  El tamaño (17,391,530 bytes) es el que informa el servidor; el archivo completo no se descargó.
+</footer>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diseño Mis Workouts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070807;
+    --screen: #0e100d;
+    --surface: #171a15;
+    --surface-2: #1f231c;
+    --border: #2a2f26;
+    --text: #f1f5ec;
+    --muted: #8e9688;
+    --lime: #c6ff2e;
+    --lime-ink: #0b0f02;
+    --lime-soft: rgba(198, 255, 46, .12);
+    --rest: #38bdf8;
+    --rest-ink: #03141d;
+    --rest-soft: rgba(56, 189, 248, .12);
+    --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 16px 32px; }
+  .page > header h1 { font: 800 34px/1.05 var(--display); text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; }
+  .page > header h1 span { color: var(--lime); }
+  .page > header p { color: var(--muted); margin: 0; }
+  .label { font: 700 14px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--lime); margin: 52px 0 12px; display: flex; align-items: center; gap: 10px; scroll-margin-top: 16px; }
+  .label::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  /* Pantalla */
+  .screen { background: var(--screen); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.5); position: relative; }
+  .appbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .logo { font: 900 22px/1 var(--display); text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .logo .mark { width: 26px; height: 26px; border-radius: 7px; background: var(--lime); color: var(--lime-ink); display: grid; place-items: center; font-size: 16px; transform: skewX(-8deg); }
+  .logo b { color: var(--lime); font-weight: 900; }
+  .tabs { display: flex; gap: 4px; }
+  .tab { border: 0; background: none; color: var(--muted); font: 700 14px/1 var(--display); text-transform: uppercase; letter-spacing: .06em; padding: 8px 12px; border-radius: 999px; cursor: pointer; transition: color .15s, background .15s; }
+  .tab:hover { color: var(--text); background: var(--surface-2); }
+  .tab.on { background: var(--lime); color: var(--lime-ink); }
+  .badge { display: inline-block; min-width: 1.4em; transition: transform .2s; }
+  .badge.bump { animation: bump .45s ease; }
+  .body { padding: 20px 18px 22px; }
+  h2 { font: 800 30px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; margin: 0 0 16px; }
+  h3 { font: 700 16px/1 var(--display); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 10px; }
+
+  button { font: inherit; }
+  .btn { border: 1px solid var(--border); background: var(--surface-2); color: var(--text); border-radius: 12px; padding: 9px 14px; font: 700 15px/1 var(--display); text-transform: uppercase; letter-spacing: .08em; cursor: pointer; transition: transform .12s ease, background .15s, border-color .15s, box-shadow .15s, opacity .15s; }
+  .btn:hover:not([disabled]) { border-color: var(--muted); }
+  .btn:active:not([disabled]) { transform: scale(.94); }
+  .btn.primary { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+  .btn.primary:hover:not([disabled]) { box-shadow: 0 0 0 4px var(--lime-soft), 0 0 24px rgba(198,255,46,.35); border-color: var(--lime); }
+  .btn.icon { width: 36px; height: 36px; padding: 0; display: inline-grid; place-items: center; font-family: "Barlow", sans-serif; font-size: 16px; }
+  .btn[disabled] { opacity: .3; cursor: not-allowed; }
+  .btn.added { background: var(--text); border-color: var(--text); color: var(--lime-ink); }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+  /* Explorar */
+  .search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0 14px; transition: border-color .15s, box-shadow .15s; }
+  .search:focus-within { border-color: var(--lime); box-shadow: 0 0 0 4px var(--lime-soft); }
+  .search input { flex: 1; background: none; border: 0; color: var(--text); font: inherit; padding: 12px 0; outline: none; min-width: 0; }
+  .search input::placeholder { color: var(--muted); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0 4px 0 12px; font-size: 14px; font-weight: 600; transition: border-color .15s, background .15s, color .15s; }
+  .chip.on { background: var(--lime-soft); border-color: var(--lime); color: var(--lime); }
+  .chip small { color: var(--muted); font-weight: 500; }
+  .chip select { background: none; border: 0; color: inherit; font: inherit; padding: 6px 4px; cursor: pointer; outline: none; }
+  .chip select option { background: var(--surface); color: var(--text); }
+  .count { color: var(--muted); font-size: 14px; margin: 10px 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; animation: pop .35s ease both; transition: transform .2s ease, border-color .2s; }
+  .card:hover { transform: translateY(-4px); border-color: var(--lime); }
+  .card .ph { background: #fff; }
+  .card img { width: 100%; max-width: 180px; aspect-ratio: 1; display: block; margin: 0 auto; }
+  .card .info { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .card .name { font: 700 19px/1.05 var(--display); text-transform: uppercase; letter-spacing: .01em; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--muted); padding: 2px 8px; border-radius: 999px; }
+  .card .btn { margin-top: auto; width: 100%; }
+  .empty { text-align: center; color: var(--muted); padding: 28px 12px; border: 1px dashed var(--border); border-radius: 16px; animation: pop .3s ease both; }
+  .empty b { display: block; color: var(--text); font: 800 22px/1.1 var(--display); text-transform: uppercase; margin-bottom: 6px; }
+  .empty .btn { margin-top: 12px; }
+
+  /* Mi circuito */
+  .config { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .field { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+  .field small { display: block; font: 700 13px/1 var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+  .stepper { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .stepper .v { font: 800 34px/1 var(--display); font-variant-numeric: tabular-nums; display: inline-block; }
+  .stepper .v em { font-style: normal; font-size: 18px; color: var(--muted); font-weight: 700; }
+  .stepper .v.tick { animation: tick .25s ease; }
+  .stepper .btn.icon { width: 32px; height: 32px; }
+  .summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 14px 0 18px; padding: 16px 18px; border: 1px solid var(--lime); background: var(--lime-soft); border-radius: 16px; }
+  .summary small { display: block; font: 700 13px/1 var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--lime); }
+  .summary strong { font: 900 48px/1 var(--display); font-variant-numeric: tabular-nums; display: inline-block; }
+  .summary strong.tick { animation: tick .3s ease; }
+  .summary span { color: var(--muted); font-size: 14px; }
+  .summary .btn.primary { padding: 14px 24px; font-size: 20px; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .station { display: grid; grid-template-columns: 30px 56px 1fr auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 10px; transition: border-color .2s; }
+  .station:hover { border-color: #3a4134; }
+  .station .pos { font: 900 26px/1 var(--display); color: var(--lime); text-align: center; }
+  .station img { width: 56px; height: 56px; border-radius: 10px; background: #fff; }
+  .station .name { font: 700 18px/1.05 var(--display); text-transform: uppercase; }
+  .station .sub { font-size: 13px; color: var(--muted); }
+  .station .actions { display: flex; gap: 4px; }
+  .station.entering { animation: slideIn .4s ease both; }
+  .station.from-up { animation: fromUp .3s ease both; }
+  .station.from-down { animation: fromDown .3s ease both; }
+  .station.moved { border-color: var(--lime); }
+  .station.leaving { animation: leave .25s ease forwards; pointer-events: none; }
+  .dist { margin-top: 22px; }
+  .dist .row { display: grid; grid-template-columns: 96px 1fr auto; gap: 10px; align-items: center; font-size: 14px; margin: 6px 0; }
+  .dist .track { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+  .dist .fill { height: 100%; background: var(--lime); border-radius: 6px; transition: width .45s cubic-bezier(.2,.8,.2,1); }
+  .dist .v { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* Entrenar */
+  .train { text-align: center; --ph: var(--lime); --ph-ink: var(--lime-ink); --ph-soft: var(--lime-soft); }
+  .train.descanso { --ph: var(--rest); --ph-ink: var(--rest-ink); --ph-soft: var(--rest-soft); }
+  .where { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .where span { background: var(--surface-2); border-radius: 999px; padding: 6px 14px; font: 700 16px/1 var(--display); text-transform: uppercase; letter-spacing: .08em; }
+  .where span b { color: var(--ph); }
+  .phase { display: inline-block; margin: 18px 0 0; background: var(--ph); color: var(--ph-ink); font: 900 18px/1 var(--display); letter-spacing: .24em; padding: 7px 16px 7px 20px; border-radius: 999px; transition: background .3s, color .3s; }
+  .phase.swap { animation: swap .45s ease; }
+  .clock { font: 900 clamp(150px, 42vw, 240px)/.86 var(--display); color: var(--ph); font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin: 14px 0 12px; text-shadow: 0 0 60px color-mix(in srgb, var(--ph) 30%, transparent); transition: color .3s; }
+  .clock.paused { animation: blink 1.2s steps(2, jump-none) infinite; }
+  .clock.beat { animation: beat .5s ease; }
+  .phasebar { max-width: 460px; margin: 0 auto; }
+  .phasebar .track { height: 14px; border-radius: 8px; background: var(--surface-2); overflow: hidden; }
+  .phasebar .fill { height: 100%; width: 0; background: var(--ph); border-radius: 8px; transition: background .3s; }
+  .train.running .phasebar .fill { background-image: linear-gradient(90deg, transparent 0 30%, rgba(255,255,255,.35) 50%, transparent 70% 100%); background-size: 200% 100%; animation: shine 1.4s linear infinite; }
+  .phasebar .ends { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); margin-top: 6px; text-align: left; }
+  .phasebar .ends span:last-child { text-align: right; }
+  .now-ex { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 22px auto 0; max-width: 460px; text-align: left; }
+  .gif { flex: none; width: 140px; height: 140px; border-radius: 16px; overflow: hidden; background: #fff; border: 2px solid var(--ph); transition: border-color .3s; }
+  .train.running .gif { animation: glow 1.6s ease-in-out infinite; }
+  .gif img { width: 140px; height: 140px; display: block; }
+  .gif img.swap { animation: pop .35s ease; }
+  .now-ex .kick { font: 700 13px/1 var(--display); text-transform: uppercase; letter-spacing: .14em; color: var(--ph); }
+  .now-ex .name { font: 800 30px/1 var(--display); text-transform: uppercase; margin-top: 4px; }
+  .now-ex .muscle { color: var(--muted); font-size: 15px; margin-top: 4px; }
+  .next { display: flex; align-items: center; gap: 12px; text-align: left; max-width: 460px; margin: 18px auto 0; padding: 10px 12px; background: var(--rest-soft); border: 1px solid rgba(56,189,248,.35); border-radius: 14px; }
+  .next img { width: 48px; height: 48px; border-radius: 8px; background: #fff; }
+  .next small { display: block; color: var(--rest); font: 700 13px/1 var(--display); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 3px; }
+  .next b { font: 700 18px/1 var(--display); text-transform: uppercase; }
+  .controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .controls .btn { padding: 15px 24px; font-size: 20px; border-radius: 14px; }
+  .controls .btn.primary { background: var(--ph); border-color: var(--ph); color: var(--ph-ink); min-width: 150px; }
+  .controls .btn.small { padding: 15px 16px; }
+  .finish { margin: 10px auto 0; font: 800 26px/1.1 var(--display); text-transform: uppercase; color: var(--lime); animation: pop .5s ease both; }
+
+  .route { margin: 26px auto 0; max-width: 460px; text-align: left; border-top: 1px solid var(--border); padding-top: 18px; }
+  .route-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .route-head span { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .laps { display: flex; gap: 6px; margin: 4px 0 12px; }
+  .laps span { flex: 1; text-align: center; font: 700 13px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; padding: 7px 0; border-radius: 8px; background: var(--surface-2); color: var(--muted); transition: background .3s, color .3s; }
+  .laps .done { background: var(--lime-soft); color: var(--lime); }
+  .laps .cur { background: var(--ph); color: var(--ph-ink); }
+  .stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .stop { display: grid; grid-template-columns: 28px 40px 1fr auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); transition: opacity .3s, border-color .3s, background .3s; }
+  .stop .pos { font: 900 20px/1 var(--display); color: var(--muted); text-align: center; }
+  .stop img { width: 40px; height: 40px; border-radius: 8px; background: #fff; }
+  .stop .n { font: 700 16px/1.05 var(--display); text-transform: uppercase; }
+  .stop .st { font: 700 12px/1 var(--display); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .stop.done { opacity: .5; }
+  .stop.done .st { color: var(--lime); }
+  .stop.cur { border-color: var(--ph); background: var(--ph-soft); }
+  .stop.cur .pos, .stop.cur .st { color: var(--ph); }
+
+  .flash { position: absolute; inset: 0; pointer-events: none; background: var(--ph); opacity: 0; }
+  .flash.go { animation: flash .6s ease-out; }
+
+  .note { font-size: 13px; color: var(--muted); margin: 10px 4px 0; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 140%); background: var(--lime); color: var(--lime-ink); font: 700 16px/1.2 var(--display); text-transform: uppercase; letter-spacing: .06em; padding: 12px 18px; border-radius: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.5); transition: transform .35s cubic-bezier(.2,.9,.3,1.3); z-index: 10; max-width: calc(100% - 32px); text-align: center; }
+  .toast.show { transform: translate(-50%, 0); }
+  footer { margin-top: 52px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; text-align: center; }
+  footer a { color: inherit; }
+
+  @keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); } }
+  @keyframes tick { 0% { transform: translateY(-6px); opacity: .3; } 100% { transform: none; opacity: 1; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+  @keyframes fromUp { from { transform: translateY(-100%); } to { transform: none; } }
+  @keyframes fromDown { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes leave { to { opacity: 0; transform: translateX(40px) scale(.96); } }
+  @keyframes beat { 0% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes blink { 50% { opacity: .35; } }
+  @keyframes swap { 0% { transform: scale(.7); opacity: 0; } 60% { transform: scale(1.12); } 100% { transform: none; opacity: 1; } }
+  @keyframes shine { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  @keyframes glow { 50% { box-shadow: 0 0 0 6px var(--ph-soft), 0 0 30px color-mix(in srgb, var(--ph) 35%, transparent); } }
+  @keyframes flash { 0% { opacity: .35; } 100% { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    html { scroll-behavior: auto; }
+  }
+  @media (max-width: 560px) {
+    .tabs { display: none; }
+    .config { grid-template-columns: 1fr; }
+    .station { grid-template-columns: 26px 48px 1fr; }
+    .station img { width: 48px; height: 48px; }
+    .station .actions { grid-column: 1 / -1; justify-content: flex-end; }
+    .gif, .gif img { width: 110px; height: 110px; }
+    .now-ex .name { font-size: 24px; }
+    .controls .btn { padding: 14px 16px; font-size: 18px; }
+    .controls .btn.primary { min-width: 0; flex: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>MIS <span>WORKOUTS</span> · Diseño</h1>
+  <p>Prototipo interactivo de las tres pantallas, con 4 ejercicios reales del dataset. Los botones funcionan y el temporizador corre de verdad. Tu circuito se guarda en este navegador.</p>
+</header>
+
+<!-- ============ EXPLORAR ============ -->
+<p class="label" id="explorar">Pantalla 1 · Explorar</p>
+<section class="screen" aria-label="Pantalla Explorar">
+  <div class="appbar">
+    <div class="logo"><span class="mark">⚡</span>MIS <b>WORKOUTS</b></div>
+    <div class="tabs" data-on="explorar"></div>
+  </div>
+  <div class="body">
+    <h2>Explorar</h2>
+    <label class="search">🔍 <input id="q" type="search" placeholder="Buscar ejercicio… (sentadilla, press, dominada)" autocomplete="off"></label>
+    <div class="filters">
+      <label class="chip" id="chip-parte"><small>Cuerpo:</small>
+        <select id="f-parte"><option value="">Todas</option></select></label>
+      <label class="chip" id="chip-equipo"><small>Equipo:</small>
+        <select id="f-equipo"><option value="">Todos</option></select></label>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+<p class="note">Los nombres van en inglés, como vienen en el dataset. La búsqueda también entiende palabras en español.</p>
+
+<!-- ============ MI CIRCUITO ============ -->
+<p class="label" id="circuito">Pantalla 2 · Mi circuito</p>
+<section class="screen" aria-label="Pantalla Mi circuito">
+  <div class="appbar">
+    <div class="logo"><span class="mark">⚡</span>MIS <b>WORKOUTS</b></div>
+    <div class="tabs" data-on="circuito"></div>
+  </div>
+  <div class="body">
+    <h2>Mi circuito</h2>
+
+    <div class="config">
+      <div class="field"><small>Trabajo</small>
+        <div class="stepper"><button class="btn icon" data-step="trabajo" data-d="-5" aria-label="Menos trabajo">−</button><span class="v" id="v-trabajo"></span><button class="btn icon" data-step="trabajo" data-d="5" aria-label="Más trabajo">+</button></div></div>
+      <div class="field"><small>Descanso</small>
+        <div class="stepper"><button class="btn icon" data-step="descanso" data-d="-5" aria-label="Menos descanso">−</button><span class="v" id="v-descanso"></span><button class="btn icon" data-step="descanso" data-d="5" aria-label="Más descanso">+</button></div></div>
+      <div class="field"><small>Vueltas</small>
+        <div class="stepper"><button class="btn icon" data-step="vueltas" data-d="-1" aria-label="Menos vueltas">−</button><span class="v" id="v-vueltas"></span><button class="btn icon" data-step="vueltas" data-d="1" aria-label="Más vueltas">+</button></div></div>
+    </div>
+
+    <div class="summary">
+      <div><small>Duración total</small><strong id="total">0:00</strong> <span id="total-sub"></span></div>
+      <button class="btn primary" id="go">▶ Entrenar</button>
+    </div>
+
+    <ol class="list" id="list"></ol>
+
+    <div class="dist" id="dist"></div>
+  </div>
+</section>
+<p class="note" id="formula"></p>
+
+<!-- ============ ENTRENAR ============ -->
+<p class="label" id="entrenar">Pantalla 3 · Entrenar</p>
+<section class="screen" aria-label="Pantalla Entrenar">
+  <div class="flash" id="flash"></div>
+  <div class="appbar">
+    <div class="logo"><span class="mark">⚡</span>MIS <b>WORKOUTS</b></div>
+    <div class="tabs" data-on="entrenar"></div>
+  </div>
+  <div class="body train" id="train">
+    <div id="train-empty" hidden>
+      <div class="empty"><b>Nada que entrenar</b>Agrega al menos un ejercicio a tu circuito.<br><button class="btn primary" data-goto="explorar">Ir a Explorar</button></div>
+    </div>
+
+    <div id="train-live">
+      <div class="where"><span>Vuelta <b id="t-v">1</b> de <span id="t-vt" style="all:unset">3</span></span><span>Estación <b id="t-e">1</b> de <span id="t-et" style="all:unset">4</span></span></div>
+      <div class="phase" id="t-phase">TRABAJO</div>
+
+      <div class="clock" id="t-clock" aria-live="off">0:40</div>
+
+      <div class="phasebar">
+        <div class="track"><div class="fill" id="t-fill"></div></div>
+        <div class="ends"><span id="t-left"></span><span id="t-right"></span></div>
+      </div>
+
+      <div class="now-ex">
+        <div class="gif"><img id="t-gif" src="" alt="" width="140" height="140"></div>
+        <div><div class="kick" id="t-kick">Ahora</div><div class="name" id="t-name"></div><div class="muscle" id="t-muscle"></div></div>
+      </div>
+
+      <div class="next" id="t-next"></div>
+      <div class="finish" id="t-finish" hidden>¡Circuito completado! 💪</div>
+
+      <div class="controls">
+        <button class="btn small" id="t-reset" aria-label="Reiniciar">↺</button>
+        <button class="btn primary" id="t-play">▶ Empezar</button>
+        <button class="btn" id="t-skip">Saltar ⏭</button>
+        <button class="btn small" id="t-sound" aria-label="Sonido">🔊</button>
+      </div>
+
+      <div class="route">
+        <div class="route-head"><h3>Tu circuito</h3><span id="t-remaining"></span></div>
+        <div class="laps" id="t-laps"></div>
+        <ol class="stops" id="t-stops"></ol>
+      </div>
+    </div>
+  </div>
+</section>
+<p class="note">El contador es lo más grande de la pantalla. El GIF se muestra a 140 px, nunca por encima de sus 180×180 originales. Suenan tres pitidos al final de cada fase; el botón 🔊 los silencia.</p>
+
+<footer>Imágenes © Gym visual — <a href="https://gymvisual.com/">gymvisual.com</a></footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const BASE = "https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@main/";
+  const KEY = "mis-workouts:circuito";
+
+  // 4 ejercicios reales del dataset. "buscar" simula las instrucciones en español.
+  const EJ = {
+    "0043": { name: "barbell full squat", parte: "Piernas", equipo: "Barra", musculo: "Glúteos", img: "images/0043-qXTaZnJ.jpg", gif: "videos/0043-qXTaZnJ.gif", buscar: "sentadilla profunda gluteos cuadriceps" },
+    "0025": { name: "barbell bench press", parte: "Pecho", equipo: "Barra", musculo: "Pectorales", img: "images/0025-EIeI8Vf.jpg", gif: "videos/0025-EIeI8Vf.gif", buscar: "press de banca pecho pectorales" },
+    "0652": { name: "pull-up", parte: "Espalda", equipo: "Peso corporal", musculo: "Dorsales", img: "images/0652-lBDjFxJ.jpg", gif: "videos/0652-lBDjFxJ.gif", buscar: "dominada barra espalda dorsales" },
+    "0001": { name: "3/4 sit-up", parte: "Cintura", equipo: "Peso corporal", musculo: "Abdominales", img: "images/0001-2gPfomN.jpg", gif: "videos/0001-2gPfomN.gif", buscar: "abdominal abdomen crunch" }
+  };
+  const DEMO = { version: 1, ejercicios: ["0043", "0025", "0652", "0001"], trabajo: 40, descanso: 20, vueltas: 3 };
+  const LIM = { trabajo: [5, 300], descanso: [0, 300], vueltas: [1, 20] };
+
+  const $ = (id) => document.getElementById(id);
+  const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+
+  // ---------- Guardado ----------
+  function cargar() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const c = JSON.parse(raw);
+        if (c && c.version === 1 && Array.isArray(c.ejercicios) &&
+            ["trabajo", "descanso", "vueltas"].every((k) => Number.isFinite(c[k]))) {
+          return { ...c, ejercicios: c.ejercicios.filter((id) => EJ[id]) };
+        }
+      }
+    } catch (e) {}
+    return { ...DEMO, ejercicios: [...DEMO.ejercicios] };
+  }
+  function guardar() { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} }
+  let c = cargar();
+
+  // ---------- Toast ----------
+  let toastT;
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+
+  // ---------- Pestañas ----------
+  function renderTabs(bump) {
+    document.querySelectorAll(".tabs").forEach((el) => {
+      const on = el.dataset.on;
+      el.innerHTML = [["explorar", "Explorar"], ["circuito", `Mi circuito · <span class="badge">${c.ejercicios.length}</span>`], ["entrenar", "Entrenar"]]
+        .map(([k, t]) => `<button class="tab${k === on ? " on" : ""}" data-goto="${k}">${t}</button>`).join("");
+      if (bump) el.querySelectorAll(".badge").forEach((b) => restart(b, "bump"));
+    });
+  }
+  document.addEventListener("click", (e) => {
+    const g = e.target.closest("[data-goto]");
+    if (g) $(g.dataset.goto).scrollIntoView({ behavior: "smooth" });
+  });
+
+  // ---------- Explorar ----------
+  const partes = [...new Set(Object.values(EJ).map((x) => x.parte))];
+  const equipos = [...new Set(Object.values(EJ).map((x) => x.equipo))];
+  partes.forEach((p) => $("f-parte").add(new Option(p, p)));
+  equipos.forEach((p) => $("f-equipo").add(new Option(p, p)));
+
+  function renderGrid() {
+    const q = norm($("q").value.trim());
+    const fp = $("f-parte").value, fe = $("f-equipo").value;
+    $("chip-parte").classList.toggle("on", !!fp);
+    $("chip-equipo").classList.toggle("on", !!fe);
+    const ids = Object.keys(EJ).filter((id) => {
+      const x = EJ[id];
+      return (!fp || x.parte === fp) && (!fe || x.equipo === fe) &&
+        (!q || norm(`${x.name} ${x.buscar} ${x.parte} ${x.equipo} ${x.musculo}`).includes(q));
+    });
+    $("count").textContent = `Mostrando ${ids.length} de 1,324 ejercicios`;
+    $("grid").innerHTML = ids.length ? ids.map((id, i) => {
+      const x = EJ[id];
+      return `<article class="card" style="animation-delay:${i * 50}ms">
+        <div class="ph"><img src="${BASE + x.img}" alt="${x.name}" width="180" height="180" loading="lazy"></div>
+        <div class="info"><div class="name">${x.name}</div>
+          <div class="tags"><span class="tag">${x.parte}</span><span class="tag">${x.equipo}</span></div>
+          <button class="btn primary" data-add="${id}">+ Agregar</button></div></article>`;
+    }).join("") : `<div class="empty" style="grid-column:1/-1"><b>Sin resultados</b>Prueba otra palabra o quita un filtro.</div>`;
+  }
+  $("q").addEventListener("input", renderGrid);
+  $("f-parte").addEventListener("change", renderGrid);
+  $("f-equipo").addEventListener("change", renderGrid);
+  $("grid").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-add]"); if (!b) return;
+    c.ejercicios.push(b.dataset.add);
+    cambio({ entering: c.ejercicios.length - 1, bump: true });
+    b.textContent = "✓ Agregado"; b.classList.add("added");
+    setTimeout(() => { b.textContent = "+ Agregar"; b.classList.remove("added"); }, 1100);
+    toast(`${EJ[b.dataset.add].name} → estación ${c.ejercicios.length}`);
+  });
+
+  // ---------- Mi circuito ----------
+  const duracion = () => {
+    const n = c.ejercicios.length * c.vueltas;
+    return n ? n * c.trabajo + (n - 1) * c.descanso : 0;
+  };
+
+  function renderCircuito(o = {}) {
+    for (const k of ["trabajo", "descanso", "vueltas"]) {
+      $("v-" + k).innerHTML = c[k] + (k === "vueltas" ? "" : "<em>s</em>");
+      document.querySelectorAll(`[data-step="${k}"]`).forEach((b) => {
+        b.disabled = +b.dataset.d < 0 ? c[k] <= LIM[k][0] : c[k] >= LIM[k][1];
+      });
+    }
+    if (o.tick) restart($("v-" + o.tick), "tick");
+    const n = c.ejercicios.length, tot = duracion();
+    const newTotal = fmt(tot);
+    if ($("total").textContent !== newTotal) { $("total").textContent = newTotal; restart($("total"), "tick"); }
+    $("total-sub").textContent = n ? `· ${n} estacion${n === 1 ? "" : "es"} × ${c.vueltas} vuelta${c.vueltas === 1 ? "" : "s"}` : "· circuito vacío";
+    $("go").disabled = !n;
+
+    $("list").innerHTML = n ? c.ejercicios.map((id, i) => {
+      const x = EJ[id];
+      return `<li class="station" data-i="${i}">
+        <span class="pos">${i + 1}</span>
+        <img src="${BASE + x.img}" alt="" width="56" height="56" loading="lazy">
+        <div><div class="name">${x.name}</div><div class="sub">${x.musculo} · ${x.equipo}</div></div>
+        <div class="actions">
+          <button class="btn icon" data-mv="-1" ${i === 0 ? "disabled" : ""} aria-label="Subir">↑</button>
+          <button class="btn icon" data-mv="1" ${i === n - 1 ? "disabled" : ""} aria-label="Bajar">↓</button>
+          <button class="btn icon" data-rm aria-label="Quitar">✕</button></div></li>`;
+    }).join("") : `<li class="empty"><b>Tu circuito está vacío</b>Agrega ejercicios desde Explorar.<br><button class="btn primary" data-goto="explorar">Ir a Explorar</button></li>`;
+
+    const items = $("list").children;
+    if (o.entering != null && items[o.entering]) items[o.entering].classList.add("entering");
+    if (o.moved) for (const [i, cls] of o.moved) if (items[i]) items[i].classList.add(cls, "moved");
+    if (o.moved) setTimeout(() => [...items].forEach((li) => li.classList.remove("moved")), 600);
+
+    // Distribución muscular
+    const cnt = {};
+    c.ejercicios.forEach((id) => { const m = EJ[id].musculo; cnt[m] = (cnt[m] || 0) + 1; });
+    const rows = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
+    const max = rows.length ? rows[0][1] : 1;
+    const prev = {};
+    $("dist").querySelectorAll(".row").forEach((r) => prev[r.dataset.m] = r.querySelector(".fill").style.width);
+    $("dist").innerHTML = rows.length ? `<h3>Distribución muscular</h3>` + rows.map(([m, k]) =>
+      `<div class="row" data-m="${m}"><span>${m}</span><div class="track"><div class="fill" style="width:${prev[m] || "0%"}" data-w="${(k / max) * 100}%"></div></div>
+       <span class="v">${k}×/vuelta · ${k * c.trabajo} s · total ${fmt(k * c.trabajo * c.vueltas)}</span></div>`).join("") : "";
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      $("dist").querySelectorAll(".fill").forEach((f) => f.style.width = f.dataset.w)));
+
+    const per = n * c.vueltas;
+    $("formula").textContent = n
+      ? `${fmt(tot)} = ${per} periodos de trabajo de ${c.trabajo} s (${per * c.trabajo} s) + ${per - 1} descansos de ${c.descanso} s (${(per - 1) * c.descanso} s). Después de la última estación de la última vuelta no hay descanso.`
+      : "Sin estaciones, la duración total es 0:00.";
+  }
+
+  document.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => {
+    const k = b.dataset.step;
+    c[k] = Math.min(LIM[k][1], Math.max(LIM[k][0], c[k] + +b.dataset.d));
+    cambio({ tick: k });
+  }));
+
+  $("list").addEventListener("click", (e) => {
+    const li = e.target.closest(".station"); if (!li) return;
+    const i = +li.dataset.i;
+    const mv = e.target.closest("[data-mv]");
+    if (mv) {
+      const j = i + +mv.dataset.mv;
+      [c.ejercicios[i], c.ejercicios[j]] = [c.ejercicios[j], c.ejercicios[i]];
+      const d = +mv.dataset.mv;
+      cambio({ moved: [[j, d < 0 ? "from-down" : "from-up"], [i, d < 0 ? "from-up" : "from-down"]] });
+    } else if (e.target.closest("[data-rm]")) {
+      const name = EJ[c.ejercicios[i]].name;
+      li.classList.add("leaving");
+      setTimeout(() => { c.ejercicios.splice(i, 1); cambio({ bump: true }); toast(`${name} quitado`); }, 230);
+    }
+  });
+
+  $("go").addEventListener("click", () => {
+    $("entrenar").scrollIntoView({ behavior: "smooth" });
+    resetTrain();
+    setTimeout(play, 450);
+  });
+
+  function cambio(o) {
+    guardar();
+    renderTabs(o.bump);
+    renderCircuito(o);
+    if (tr.started && !tr.done) toast("Circuito cambiado: entrenamiento reiniciado");
+    resetTrain();
+  }
+
+  // ---------- Entrenar ----------
+  let tr = {};
+  let sound = true, actx = null;
+
+  function fases() {
+    const out = [], n = c.ejercicios.length;
+    for (let v = 1; v <= c.vueltas; v++) for (let i = 0; i < n; i++) {
+      out.push({ tipo: "trabajo", v, i, dur: c.trabajo });
+      if (!(v === c.vueltas && i === n - 1) && c.descanso > 0) out.push({ tipo: "descanso", v, i, dur: c.descanso });
+    }
+    return out;
+  }
+  function resetTrain() {
+    const f = fases();
+    tr = { fases: f, idx: 0, rest: f.length ? f[0].dur * 1000 : 0, run: false, done: false, started: false, lastSec: null, lastIdx: -1 };
+    renderTrain();
+  }
+
+  function beep(freq = 880, ms = 120) {
+    if (!sound) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = freq; o.type = "square";
+      g.gain.setValueAtTime(.08, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + ms / 1000);
+      o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + ms / 1000);
+    } catch (e) {}
+  }
+
+  function avanzar() {
+    tr.idx++;
+    if (tr.idx >= tr.fases.length) {
+      tr.idx = tr.fases.length - 1; tr.rest = 0; tr.run = false; tr.done = true;
+      beep(660, 180); setTimeout(() => beep(990, 400), 200);
+    } else {
+      tr.rest = tr.fases[tr.idx].dur * 1000;
+      beep(tr.fases[tr.idx].tipo === "trabajo" ? 1180 : 520, 260);
+    }
+    restart($("flash"), "go");
+  }
+
+  function play() {
+    if (!tr.fases.length) return;
+    if (tr.done) resetTrain();
+    tr.run = !tr.run; tr.started = true;
+    if (actx && actx.state === "suspended") actx.resume();
+    if (tr.run && tr.rest === tr.fases[tr.idx].dur * 1000) beep(1180, 200);
+    renderTrain();
+  }
+  $("t-play").addEventListener("click", play);
+  $("t-skip").addEventListener("click", () => { if (tr.fases.length && !tr.done) { tr.started = true; avanzar(); renderTrain(); } });
+  $("t-reset").addEventListener("click", () => { resetTrain(); toast("Entrenamiento reiniciado"); });
+  $("t-sound").addEventListener("click", (e) => { sound = !sound; e.currentTarget.textContent = sound ? "🔊" : "🔇"; });
+
+  function renderTrain() {
+    const F = tr.fases, n = c.ejercicios.length;
+    $("train-empty").hidden = !!F.length;
+    $("train-live").hidden = !F.length;
+    if (!F.length) return;
+
+    const f = F[tr.idx];
+    const work = f.tipo === "trabajo" ? f : F[tr.idx + 1];   // la estación que se muestra
+    const wIdx = F.indexOf(work);
+    const nextWork = F.slice(wIdx + 1).find((p) => p.tipo === "trabajo");
+    const x = EJ[c.ejercicios[work.i]];
+    const train = $("train");
+
+    train.classList.toggle("descanso", f.tipo === "descanso" && !tr.done);
+    train.classList.toggle("running", tr.run);
+
+    $("t-v").textContent = work.v; $("t-vt").textContent = c.vueltas;
+    $("t-e").textContent = work.i + 1; $("t-et").textContent = n;
+
+    const label = tr.done ? "¡TERMINADO!" : f.tipo === "trabajo" ? "TRABAJO" : "DESCANSO";
+    if ($("t-phase").textContent !== label) { $("t-phase").textContent = label; if (tr.lastIdx !== -1) restart($("t-phase"), "swap"); }
+
+    const sec = tr.done ? 0 : Math.ceil(tr.rest / 1000);
+    $("t-clock").textContent = fmt(sec);
+    $("t-clock").classList.toggle("paused", tr.started && !tr.run && !tr.done);
+    if (tr.run && sec !== tr.lastSec && sec <= 3 && sec > 0) { restart($("t-clock"), "beat"); beep(880, 110); }
+    tr.lastSec = sec;
+
+    const elapsed = tr.done ? f.dur : f.dur - tr.rest / 1000;
+    $("t-fill").style.width = `${Math.min(100, (elapsed / f.dur) * 100)}%`;
+    $("t-left").textContent = tr.done ? "Listo" : `${f.tipo === "trabajo" ? "Trabajo" : "Descanso"} · ${Math.floor(elapsed)} de ${f.dur} s`;
+    const after = F[tr.idx + 1];
+    $("t-right").textContent = tr.done ? "" : after ? `Luego: ${after.tipo} ${after.dur} s` : "Luego: ¡fin!";
+
+    const gif = $("t-gif"), src = BASE + x.gif;
+    if (gif.getAttribute("src") !== src) { gif.src = src; gif.alt = `Animación de ${x.name}`; restart(gif, "swap"); }
+    $("t-kick").textContent = tr.done ? "Último ejercicio" : f.tipo === "trabajo" ? "Ahora" : "Prepárate";
+    $("t-name").textContent = x.name;
+    $("t-muscle").textContent = `${x.musculo} · ${x.equipo}`;
+
+    const nx = nextWork && EJ[c.ejercicios[nextWork.i]];
+    $("t-next").hidden = tr.done;
+    $("t-next").innerHTML = nx
+      ? `<img src="${BASE + nx.img}" alt="" width="48" height="48"><div><small>Siguiente${nextWork.v !== work.v ? ` · vuelta ${nextWork.v}` : ""}</small><b>${nx.name}</b> · ${nx.musculo}</div>`
+      : `<div><small>Siguiente</small><b>Es el último</b> · ¡a tope!</div>`;
+    $("t-finish").hidden = !tr.done;
+
+    $("t-play").textContent = tr.done ? "↺ Repetir" : tr.run ? "⏸ Pausa" : tr.started ? "▶ Seguir" : "▶ Empezar";
+    $("t-skip").disabled = tr.done;
+
+    let left = tr.done ? 0 : tr.rest / 1000;
+    for (let k = tr.idx + 1; k < F.length && !tr.done; k++) left += F[k].dur;
+    $("t-remaining").textContent = tr.done ? "Completado" : `Quedan ${fmt(Math.ceil(left))}`;
+
+    // Solo reconstruir la ruta cuando cambia de fase
+    if (tr.lastIdx !== tr.idx) {
+      $("t-laps").innerHTML = Array.from({ length: c.vueltas }, (_, k) => {
+        const v = k + 1, cls = tr.done || v < work.v ? "done" : v === work.v ? "cur" : "";
+        return `<span class="${cls}">Vuelta ${v}${cls === "done" ? " ✓" : ""}</span>`;
+      }).join("");
+      $("t-stops").innerHTML = c.ejercicios.map((id, i) => {
+        const e = EJ[id];
+        const st = tr.done || i < work.i ? "done" : i === work.i ? "cur" : "";
+        const txt = st === "done" ? "Hecho ✓" : st === "cur" ? (f.tipo === "trabajo" ? "Ahora" : "Sigue") : `${c.trabajo} s`;
+        return `<li class="stop ${st}"><span class="pos">${i + 1}</span><img src="${BASE + e.img}" alt="" width="40" height="40" loading="lazy"><span class="n">${e.name}</span><span class="st">${txt}</span></li>`;
+      }).join("");
+    }
+    tr.lastIdx = tr.idx;
+  }
+
+  let last = null;
+  function frame(t) {
+    if (tr.run && last != null) {
+      tr.rest -= t - last;
+      while (tr.rest <= 0 && !tr.done) { const over = -tr.rest; avanzar(); if (!tr.done) tr.rest -= over; }
+      renderTrain();
+    }
+    last = t;
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Inicio ----------
+  renderTabs();
+  renderGrid();
+  renderCircuito();
+  resetTrain();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
